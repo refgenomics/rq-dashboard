@@ -85,7 +85,11 @@
 
         <h1>Jobs on <strong{% if queue.name == 'failed' %} class="failed"{% endif %}>{{ queue.name }}</strong></h1>
         <p class="intro">
-        <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip" title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true ><i class="icon-trash icon-white"></i> Empty</a>
+
+        <!-- <a href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" id="empty-btn" class="btn btn-danger btn-small" style="float: right" data-toggle="tooltip" title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true ><i class="icon-trash icon-white"></i> EmptyOld</a> -->
+
+        <a href="#delete-modal" id="pre-empty-btn" class="btn btn-danger btn-small" style="float: right" data-toggle="modal" role="button" rel="tooltip" data-original-title="Remove all jobs from this queue (<b>destructive</b>)" data-html=true ><i class="icon-trash icon-white"></i> Empty</a>
+
         <a href="{{ url_for('rq_dashboard.compact_queue', queue_name=queue.name) }}" id="compact-btn" class="btn btn-small" style="float: right; margin-right: 8px;" data-toggle="tooltip" title="Remove all stale jobs from this queue (non-destructive)" ><i class="icon-resize-small"></i> Compact</a>
         <a href="{{ url_for('rq_dashboard.requeue_all') }}" id="requeue-all-btn" class="btn btn-small" style="float: right; margin-right: 8px;"><i class="icon-retweet"></i> Requeue All</a>
         This list below contains all the registered jobs on queue <strong>{{ queue.name }}</strong>, sorted by age (oldest on top).</p>
@@ -124,7 +128,11 @@
                     <% if (d.exc_info) { %>
                         <a href="#" data-role="requeue-job-btn" class="btn btn-small"><i class="icon-retweet"></i> Requeue</a>
                     <% } %>
-                    <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a>
+
+                    <!-- Comment out the Cancel Job data-role below -->
+                    <!-- <a href="#" data-role="cancel-job-btn" class="btn btn-small"><i class="icon-remove"></i> Cancel</a> -->
+
+                    <a onclick="show_cancel_modal(this)" class="btn btn-small" role="button"><i class="icon-remove"></i> Cancel</a>
                 </td>
             </tr>
         </script>
@@ -172,10 +180,64 @@
 </div>
 
 
+<!-- Modal code -->
+<!-- Delete all modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Delete all jobs?</h4>
+      </div>
+      <div class="modal-body">
+        <p>To confirm and remove all jobs from {{ queue.name }}, type DELETE in the box below and click "Delete All Jobs".</p>
+        <form class='form' action="javascript:void(0);">
+          <input type='text' style='width: 95%;' class='form-control' oninput="if (this.value == 'DELETE'){$('#empty-btn-modal').removeClass('disabled');} else {$('#empty-btn-modal').addClass('disabled');}"></input>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger disabled" href="{{ url_for('rq_dashboard.empty_queue', queue_name=queue.name) }}" data-html=true id="empty-btn-modal"><i class="icon-trash icon-white"></i> Delete All Jobs</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="icon-remove"></i> Cancel & Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<!-- Simply one-job cancellation modal -->
+<div class="modal fade" id="cancel-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Cancel this job?</h4>
+      </div>
+      <div class="modal-body pull-right">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Keep Job</button>
+        <button type="button" class="btn btn-danger" id="cancel-modal-btn" data-role="cancel-job-btn"><i class="icon-remove icon-white"></i> Confirm & Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 {% endblock %}
 
 
 {% block inline_js %}
 var POLL_INTERVAL = {{ poll_interval }};
+
+$(document).ready(function() {
+    cancelModal = $("#cancel-modal").modal({
+      show: false
+    });
+    deleteModal = $('#delete-modal').modal({
+      show: false
+    });
+});
+
+show_cancel_modal = function(t) {
+    $("#cancel-modal").modal({
+      show: true
+    });
+    $("#cancel-modal-btn").data('job-id', $(t).parents('tr').data('job-id'));
+}
+
 {% include "rq_dashboard/dashboard.js" with context %}
 {% endblock %}

@@ -279,6 +279,23 @@ var api = {
         return false;
     });
 
+    // Enable AJAX behavior on modal empty button
+    $('#empty-btn-modal').click(function(e) {
+        if ($(this).hasClass("disabled")) {
+            return false;
+        }
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var $this = $(this);
+        $.post($this.attr('href'), function(data) {
+            reload_table();
+        });
+        $("#delete-modal").modal('hide');
+        return false;
+    });
+
     $('#compact-btn').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -315,6 +332,24 @@ var api = {
 
         return false;
     });
+
+    // Enable the AJAX behaviour of the empty button in the new modal
+    $("#cancel-modal-btn").on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Manually get the row based on its data-job-id
+        var job_id = $("#cancel-modal-btn").data('job-id')
+        var $row = $("#jobs tbody").children("[data-job-id='" + job_id + "']").parents('tr')
+        var url = url_for('cancel_job', job_id);
+
+        $.post(url, function(data) {
+            $row.fadeOut('fast', function() { $row.remove(); });
+        });
+
+        $("#cancel-modal").modal('hide');
+        return false;
+    })
 
     // Enable the AJAX behaviour of the requeue button
     $tbody.on('click', '[data-role=requeue-job-btn]', function(e) {
