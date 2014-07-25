@@ -1,11 +1,13 @@
 `rq-dashboard` is a general purpose, lightweight, [Flask][flask]-based web
 front-end to monitor your [RQ][rq] queues, jobs, and workers in realtime.
 
+ [![Can I Use Python 3?](https://caniusepython3.com/project/rq-dashboard.svg)](https://caniusepython3.com/project/rq-dashboard)
+
 
 ## It looks like this
 
-![](https://github.com/downloads/nvie/rq-dashboard/scrot_high.png)
-![](https://github.com/downloads/nvie/rq-dashboard/scrot_failed.png)
+![](https://cloud.github.com/downloads/nvie/rq-dashboard/scrot_high.png)
+![](https://cloud.github.com/downloads/nvie/rq-dashboard/scrot_failed.png)
 
 
 ## Installing
