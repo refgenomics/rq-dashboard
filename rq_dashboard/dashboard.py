@@ -1,6 +1,7 @@
 from redis import Redis
 from redis import from_url
 from rq import push_connection, pop_connection
+from rq.job import Job
 from functools import wraps
 import times
 from flask import Blueprint
@@ -127,7 +128,13 @@ def overview(queue_name, page):
 @dashboard.route('/job/<job_id>/cancel', methods=['POST'])
 @jsonify
 def cancel_job_view(job_id):
-    cancel_job(job_id)
+    rq_job = Job.fetch(job_id)
+
+    if rq_job.status == "failed":
+        rq_job.delete()
+    else:
+        rq_job.cancel()
+
     return dict(status='OK')
 
 
